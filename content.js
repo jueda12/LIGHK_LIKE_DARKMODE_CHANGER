@@ -88,8 +88,7 @@ button {
 }
 
 img,
-picture,
-picture *,
+picture > img,
 video,
 iframe,
 svg,
@@ -98,10 +97,6 @@ canvas {
   mix-blend-mode: normal !important;
   background: transparent !important;
   opacity: 1 !important;
-}
-
-[style*="background-image"] {
-  background-color: transparent !important;
 }
 `;
 
