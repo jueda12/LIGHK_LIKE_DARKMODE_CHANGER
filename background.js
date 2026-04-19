@@ -24,6 +24,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 
   chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_LIHKG_DARK_MODE' }, () => {
-    void chrome.runtime.lastError;
+    if (chrome.runtime.lastError) {
+      console.debug('LIHKG dark mode toggle unavailable on this page:', chrome.runtime.lastError.message);
+    }
   });
 });

@@ -10,11 +10,28 @@ html, body {
   color: #d7dce3 !important;
 }
 
-body *,
-body *::before,
-body *::after {
-  background-color: transparent !important;
-  color: inherit;
+main,
+article,
+section,
+nav,
+aside,
+header,
+footer,
+div,
+form,
+table,
+tr,
+td,
+th,
+ul,
+ol,
+li {
+  background-color: #1f242a !important;
+}
+
+*,
+*::before,
+*::after {
   border-color: #39414d !important;
 }
 
@@ -46,7 +63,7 @@ canvas {
 }
 `;
 
-function toggleLihkgLikeDarkMode() {
+function toggleLIHKGDarkMode() {
   const existing = document.getElementById(STYLE_ID);
   if (existing) {
     existing.remove();
@@ -61,6 +78,6 @@ function toggleLihkgLikeDarkMode() {
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.type === 'TOGGLE_LIHKG_DARK_MODE') {
-    toggleLihkgLikeDarkMode();
+    toggleLIHKGDarkMode();
   }
 });
