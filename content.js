@@ -1,5 +1,6 @@
 const STYLE_ID = '__lihkg_like_dark_mode_style__';
 const MAX_SAMPLE_NODES = 60;
+const MIN_VIEWPORT_AREA = 1;
 const MIN_VISIBLE_WEIGHT = 0.2; // Keep small visible blocks from being ignored in tone estimation.
 const LIGHT_TONE_SCORE_THRESHOLD = 0.15; // Average background-vs-text luminance gap indicating a light theme.
 const LIGHT_BACKGROUND_LUMINANCE_THRESHOLD = 0.55; // Individual background luminance considered bright.
@@ -147,7 +148,8 @@ function parseRgbColor(color) {
   }
 
   const parts = rgbMatch[1].split(',').map((part) => Number.parseFloat(part.trim()));
-  if (parts.length < 3 || parts.slice(0, 3).some((part) => Number.isNaN(part))) {
+  const rgbParts = parts.slice(0, 3);
+  if (parts.length < 3 || rgbParts.some((part) => Number.isNaN(part))) {
     return null;
   }
 
@@ -193,8 +195,7 @@ function getNodeToneScore(node) {
   }
 
   const rect = node.getBoundingClientRect();
-  // Clamp to 1 so downstream area ratios never divide by zero in edge rendering contexts.
-  const viewportArea = Math.max(window.innerWidth * window.innerHeight, 1);
+  const viewportArea = Math.max(window.innerWidth * window.innerHeight, MIN_VIEWPORT_AREA);
   const area = Math.max(0, Math.min(rect.width * rect.height, viewportArea));
   const areaWeight = Math.max(MIN_VISIBLE_WEIGHT, Math.min(1, area / viewportArea));
 
@@ -230,11 +231,7 @@ function detectPageTone() {
   });
 
   if (!totalWeight) {
-    if (typeof window.matchMedia === 'function') {
-      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-    }
-    // Prefer light by default so the stronger dark conversion still works on unknown/legacy pages.
-    return 'light';
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   }
 
   const averageScore = weightedScore / totalWeight;
