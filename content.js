@@ -2,6 +2,7 @@ const STYLE_ID = '__lihkg_like_dark_mode_style__';
 const MAX_SAMPLE_NODES = 60;
 const MIN_VISIBLE_WEIGHT = 0.2; // Keep small visible blocks from being ignored in tone estimation.
 const LIGHT_TONE_SCORE_THRESHOLD = 0.15; // Average background-vs-text luminance gap indicating a light theme.
+const LIGHT_BACKGROUND_LUMINANCE_THRESHOLD = 0.55; // Individual background luminance considered bright.
 const LIGHT_BACKGROUND_RATIO_THRESHOLD = 0.55; // Majority of sampled backgrounds must be bright to classify as light.
 
 const DARK_MODE_CSS = `
@@ -222,7 +223,7 @@ function detectPageTone() {
 
     weightedScore += sample.score * sample.weight;
     totalWeight += sample.weight;
-    if (sample.bgLum > 0.55) {
+    if (sample.bgLum > LIGHT_BACKGROUND_LUMINANCE_THRESHOLD) {
       lightBackgroundWeight += sample.weight;
     }
   });
