@@ -193,6 +193,7 @@ function getNodeToneScore(node) {
   }
 
   const rect = node.getBoundingClientRect();
+  // Clamp to 1 so downstream area ratios never divide by zero in edge rendering contexts.
   const viewportArea = Math.max(window.innerWidth * window.innerHeight, 1);
   const area = Math.max(0, Math.min(rect.width * rect.height, viewportArea));
   const areaWeight = Math.max(MIN_VISIBLE_WEIGHT, Math.min(1, area / viewportArea));
@@ -232,6 +233,7 @@ function detectPageTone() {
     if (typeof window.matchMedia === 'function') {
       return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     }
+    // Prefer light by default so the stronger dark conversion still works on unknown/legacy pages.
     return 'light';
   }
 
