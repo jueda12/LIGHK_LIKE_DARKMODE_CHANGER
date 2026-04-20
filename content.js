@@ -1,5 +1,8 @@
 const STYLE_ID = '__lihkg_like_dark_mode_style__';
 const MAX_SAMPLE_NODES = 60;
+const MIN_VISIBLE_WEIGHT = 0.2; // Keep small visible blocks from being ignored in tone estimation.
+const LIGHT_TONE_SCORE_THRESHOLD = 0.15; // Average background-vs-text luminance gap indicating a light theme.
+const LIGHT_BACKGROUND_RATIO_THRESHOLD = 0.55; // Majority of sampled backgrounds must be bright to classify as light.
 
 const DARK_MODE_CSS = `
 :root {
@@ -191,7 +194,7 @@ function getNodeToneScore(node) {
   const rect = node.getBoundingClientRect();
   const viewportArea = Math.max(window.innerWidth * window.innerHeight, 1);
   const area = Math.max(0, Math.min(rect.width * rect.height, viewportArea));
-  const areaWeight = Math.max(0.2, Math.min(1, area / viewportArea));
+  const areaWeight = Math.max(MIN_VISIBLE_WEIGHT, Math.min(1, area / viewportArea));
 
   return {
     score: bgLum - textLum,
@@ -225,12 +228,17 @@ function detectPageTone() {
   });
 
   if (!totalWeight) {
-    return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    if (typeof window.matchMedia === 'function') {
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    return 'light';
   }
 
   const averageScore = weightedScore / totalWeight;
   const lightBgRatio = lightBackgroundWeight / totalWeight;
-  return averageScore >= 0.15 || lightBgRatio >= 0.55 ? 'light' : 'dark';
+  return averageScore >= LIGHT_TONE_SCORE_THRESHOLD || lightBgRatio >= LIGHT_BACKGROUND_RATIO_THRESHOLD
+    ? 'light'
+    : 'dark';
 }
 
 function toggleLIHKGDarkMode() {
