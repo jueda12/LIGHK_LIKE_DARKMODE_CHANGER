@@ -1,6 +1,5 @@
 const STYLE_ID = '__lihkg_like_dark_mode_style__';
 const MAX_SAMPLE_NODES = 60;
-const MIN_VIEWPORT_AREA = 1;
 const MIN_VISIBLE_WEIGHT = 0.2; // Keep small visible blocks from being ignored in tone estimation.
 const LIGHT_TONE_SCORE_THRESHOLD = 0.15; // Average background-vs-text luminance gap indicating a light theme.
 const LIGHT_BACKGROUND_LUMINANCE_THRESHOLD = 0.55; // Individual background luminance considered bright.
@@ -162,7 +161,7 @@ function parseRgbColor(color) {
   };
 }
 
-function toLuminance(channel) {
+function linearizeChannelValue(channel) {
   const value = channel / 255;
   return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
 }
@@ -174,9 +173,9 @@ function getRelativeLuminance(color) {
 
   const alpha = color.a === undefined ? 1 : color.a;
   const blend = (channel) => channel * alpha + 255 * (1 - alpha);
-  const r = toLuminance(blend(color.r));
-  const g = toLuminance(blend(color.g));
-  const b = toLuminance(blend(color.b));
+  const r = linearizeChannelValue(blend(color.r));
+  const g = linearizeChannelValue(blend(color.g));
+  const b = linearizeChannelValue(blend(color.b));
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
@@ -195,7 +194,10 @@ function getNodeToneScore(node) {
   }
 
   const rect = node.getBoundingClientRect();
-  const viewportArea = Math.max(window.innerWidth * window.innerHeight, MIN_VIEWPORT_AREA);
+  const viewportArea = window.innerWidth * window.innerHeight;
+  if (viewportArea <= 0) {
+    return null;
+  }
   const area = Math.max(0, Math.min(rect.width * rect.height, viewportArea));
   const areaWeight = Math.max(MIN_VISIBLE_WEIGHT, Math.min(1, area / viewportArea));
 
